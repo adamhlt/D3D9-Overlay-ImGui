@@ -60,4 +60,4 @@ Everything is setup, you just need to choose between DLL or EXE.
 
 ## 🧪 Demonstration :
 
-[Demo](https://github.com/adamhlt/D3D9-Overlay-ImGui/assets/48086737/9107eb7e-b1a0-40d5-9ac2-ec489fa14ddf)
+https://github.com/adamhlt/D3D9-Overlay-ImGui/assets/48086737/3256716b-a66c-4e04-ad53-43e6377aebff
