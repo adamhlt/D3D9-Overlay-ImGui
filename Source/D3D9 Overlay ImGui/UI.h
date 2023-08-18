@@ -17,6 +17,7 @@ private:
 	static bool CreateDeviceD3D(HWND hWnd);
 	static void CleanupDeviceD3D();
 	static void ResetDevice();
+	static void DrawFilledRectangle(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b);
 	static LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 public:

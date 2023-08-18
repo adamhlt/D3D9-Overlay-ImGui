@@ -171,11 +171,15 @@ void UI::Render()
 
         ImGui::Render();
         ImGui::EndFrame();
+
         pD3DDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
         pD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
         pD3DDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
         const D3DCOLOR clear_col_dx = D3DCOLOR_RGBA((int)(clear_color.x * clear_color.w * 255.0f), (int)(clear_color.y * clear_color.w * 255.0f), (int)(clear_color.z * clear_color.w * 255.0f), (int)(clear_color.w * 255.0f));
         pD3DDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
+
+        DrawFilledRectangle(100, 100, 500, 500, 255, 255, 255);
+
         if (pD3DDevice->BeginScene() >= 0)
         {
             ImGui::Render();
@@ -219,4 +223,12 @@ void UI::CleanupDeviceD3D()
 {
     if (pD3DDevice) { pD3DDevice->Release(); pD3DDevice = nullptr; }
     if (pD3D) { pD3D->Release(); pD3D = nullptr; }
+}
+
+void UI::DrawFilledRectangle(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b)
+{
+    const D3DCOLOR rectColor = D3DCOLOR_XRGB(r, g, b);	//No point in using alpha because clear & alpha dont work!
+    const D3DRECT BarRect = { x, y, x + w, y + h };
+
+    pD3DDevice->Clear(1, &BarRect, D3DCLEAR_TARGET | D3DCLEAR_TARGET, rectColor, 0, 0);
 }
