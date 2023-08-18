@@ -178,8 +178,6 @@ void UI::Render()
         const D3DCOLOR clear_col_dx = D3DCOLOR_RGBA((int)(clear_color.x * clear_color.w * 255.0f), (int)(clear_color.y * clear_color.w * 255.0f), (int)(clear_color.z * clear_color.w * 255.0f), (int)(clear_color.w * 255.0f));
         pD3DDevice->Clear(0, nullptr, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, clear_col_dx, 1.0f, 0);
 
-        DrawFilledRectangle(100, 100, 500, 500, 255, 255, 255);
-
         if (pD3DDevice->BeginScene() >= 0)
         {
             ImGui::Render();
