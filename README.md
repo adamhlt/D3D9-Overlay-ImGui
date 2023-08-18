@@ -21,7 +21,7 @@
 
 D3D9 Overlay ImGui use D3D9 to create a DirectX window with ImGui, and this allow you to draw on top of games / application.
 
-You can easily use it as a DLL for internal cheat and EXE for external. Everything is setup you just need to choose between DLL or EXE. D3D11 Overlay ImGui create his own window, if you use it as a DLL you main process don't need to use DirectX.
+You can easily use it as a DLL for internal cheat and EXE for external. Everything is setup you just need to choose between DLL or EXE. D3D9 Overlay ImGui create his own window, if you use it as a DLL you main process don't need to use DirectX.
 
 This project works in x86 and x64, DLL and EXE.
 
@@ -60,4 +60,4 @@ Everything is setup, you just need to choose between DLL or EXE.
 
 ## 🧪 Demonstration :
 
-[Demo](https://github.com/adamhlt/D3D11-Overlay-ImGui/assets/48086737/1afe86bb-d1e7-4b09-a6dc-4c153770bfe5)
+https://github.com/adamhlt/D3D9-Overlay-ImGui/assets/48086737/9107eb7e-b1a0-40d5-9ac2-ec489fa14ddf
