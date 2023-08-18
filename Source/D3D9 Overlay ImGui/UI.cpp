@@ -19,7 +19,7 @@ bool UI::CreateDeviceD3D(HWND hWnd)
     ZeroMemory(&D3Dpp, sizeof(D3Dpp));
     D3Dpp.Windowed = TRUE;
     D3Dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    D3Dpp.BackBufferFormat = D3DFMT_UNKNOWN;
+    D3Dpp.BackBufferFormat = D3DFMT_A8R8G8B8;
     D3Dpp.EnableAutoDepthStencil = TRUE;
     D3Dpp.AutoDepthStencilFormat = D3DFMT_D16;
     D3Dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
