@@ -60,4 +60,10 @@ Everything is setup, you just need to choose between DLL or EXE.
 
 ## 🧪 Demonstration :
 
+**DLL - OBS DEMO**
+
 https://github.com/adamhlt/D3D9-Overlay-ImGui/assets/48086737/3256716b-a66c-4e04-ad53-43e6377aebff
+
+**EXE - Overlay Window Picker**
+
+https://github.com/adamhlt/D3D9-Overlay-ImGui/assets/48086737/b4e8c7e9-68a1-4b25-94fb-793b4704e693
