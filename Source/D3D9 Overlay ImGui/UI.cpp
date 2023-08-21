@@ -505,8 +505,8 @@ BOOL UI::IsWindowCloaked(const HWND hCurrentWindow)
 void UI::SetTargetWindow(const HWND hWindow)
 {
     hTargetWindow = hWindow;
-    GetWindowThreadProcessId(hTargetWindow, &dTargetPID);
     SetForegroundWindow(hTargetWindow);
+    GetWindowThreadProcessId(hTargetWindow, &dTargetPID);
     bTargetSet = TRUE;
 }
 
