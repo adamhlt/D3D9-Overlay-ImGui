@@ -314,7 +314,7 @@ BOOL CALLBACK UI::EnumWind(const HWND hWindow, const LPARAM lPrams)
     if (GetCurrentProcessId() != procID)
         return TRUE;
 
-    if(!IsWindowValid(hWindow))
+    if (!IsWindowValid(hWindow))
         return TRUE;
 
     SetTargetWindow(hWindow);
