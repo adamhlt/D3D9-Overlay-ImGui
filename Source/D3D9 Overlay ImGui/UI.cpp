@@ -314,6 +314,9 @@ BOOL CALLBACK UI::EnumWind(const HWND hWindow, const LPARAM lPrams)
     if (GetCurrentProcessId() != procID)
         return TRUE;
 
+    if(!IsWindowValid(hWindow))
+        return TRUE;
+
     SetTargetWindow(hWindow);
     return FALSE;
 }
@@ -390,9 +393,7 @@ void UI::GetAllWindow(std::vector<WindowItem>* vWindowList)
 
 /**
     @brief : Callback function that retrive all the valid window and get processname, pid and window title.
-    @param  hWindow - 
-    @param  lPrams  - 
-    @retval         - 
+             (https://learn.microsoft.com/fr-fr/windows/win32/api/winuser/nf-winuser-enumwindows)
 **/
 BOOL CALLBACK UI::EnumAllWind(const HWND hWindow, const LPARAM lPrams)
 {
