@@ -8,6 +8,8 @@ UINT UI::g_ResizeHeight = 0;
 UINT UI::g_ResizeWidth = 0;
 bool UI::bInit = false;
 HWND UI::hTargetWindow = nullptr;
+BOOL UI::bTargetSet = FALSE;
+DWORD UI::dTargetPID = 0;
 
 HMODULE UI::hCurrentModule = nullptr;
 
@@ -160,8 +162,11 @@ void UI::Render()
                 bDone = true;
         }
 
-
         if (GetAsyncKeyState(VK_END) & 1)
+            bDone = true;
+
+        // Check if the targeted window is still up.
+        if (!IsWindowAlive() && bTargetSet)
             bDone = true;
 
         if (bDone)
@@ -182,12 +187,12 @@ void UI::Render()
         else
             continue;
         #else
-        if (hTargetWindow != nullptr)
+        if (hTargetWindow != nullptr && bTargetSet)
             MoveWindow(hwnd);
         #endif
 
         // Clear overlay when the targeted window is not focus
-        if (!IsWindowFocus(hwnd) && hTargetWindow != nullptr)
+        if (!IsWindowFocus(hwnd) && bTargetSet)
         {
             pD3DDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
             pD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
@@ -370,7 +375,7 @@ BOOL UI::IsWindowFocus(const HWND hCurrentProcessWindow)
 **/
 BOOL UI::IsWindowTargeted()
 {
-    return hTargetWindow != nullptr;
+    return bTargetSet;
 }
 
 /**
@@ -500,4 +505,29 @@ BOOL UI::IsWindowCloaked(const HWND hCurrentWindow)
 void UI::SetTargetWindow(const HWND hWindow)
 {
     hTargetWindow = hWindow;
+    GetWindowThreadProcessId(hTargetWindow, &dTargetPID);
+    SetForegroundWindow(hTargetWindow);
+    bTargetSet = TRUE;
+}
+
+/**
+    @brief : Function that look if the targeted window has been closed.
+    @retval : TRUE if the function is still up else FALSE.
+**/
+BOOL UI::IsWindowAlive()
+{
+    DWORD dCurrentPID;
+
+    if (hTargetWindow == nullptr)
+        return FALSE;
+
+    if (!IsWindow(hTargetWindow))
+        return FALSE;
+
+    GetWindowThreadProcessId(hTargetWindow, &dCurrentPID);
+
+    if (dCurrentPID != dTargetPID)
+        return FALSE;
+
+    return TRUE;
 }

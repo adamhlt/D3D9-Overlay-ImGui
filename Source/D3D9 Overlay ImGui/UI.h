@@ -16,6 +16,8 @@ private:
 	static bool bInit;
 	static UINT g_ResizeWidth, g_ResizeHeight;
 	static HWND hTargetWindow;
+	static BOOL bTargetSet;
+	static DWORD dTargetPID;
 
 	static bool CreateDeviceD3D(HWND hWnd);
 	static void CleanupDeviceD3D();
@@ -29,6 +31,7 @@ private:
 	static void GetProcessName(LPSTR lpProcessName, DWORD dPID);
 	static BOOL IsWindowValid(HWND hCurrentWindow);
 	static BOOL IsWindowCloaked(HWND hCurrentWindow);
+	static BOOL IsWindowAlive();
 
 public:
 	static HMODULE hCurrentModule;
