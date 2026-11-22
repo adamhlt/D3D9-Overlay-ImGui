@@ -1,31 +1,55 @@
-#include "UI.h"
+#include "pch.h"
+#include "Overlay.h"
 
 #ifdef _WINDLL
 
-HANDLE hCurrentUIThread = nullptr;
+namespace
+{
+	HMODULE currentModule = nullptr;
+	HANDLE overlayThread = nullptr;
+	DWORD overlayThreadId = 0;
+
+	DWORD WINAPI OverlayThread(LPVOID)
+	{
+		Overlay::Run();
+
+		// The overlay is closed, unload the DLL.
+		FreeLibraryAndExitThread(currentModule, 0);
+	}
+}
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
 {
-    if (fdwReason == DLL_PROCESS_ATTACH)
-    {
-        DisableThreadLibraryCalls(hinstDLL);
-        UI::hCurrentModule = hinstDLL;
-        hCurrentUIThread = CreateThread(nullptr, NULL, (LPTHREAD_START_ROUTINE)UI::Render, nullptr, NULL, nullptr);
-    }
+	if (fdwReason == DLL_PROCESS_ATTACH)
+	{
+		DisableThreadLibraryCalls(hinstDLL);
+		currentModule = hinstDLL;
+		overlayThread = CreateThread(nullptr, 0, OverlayThread, nullptr, 0, &overlayThreadId);
+	}
+	else if (fdwReason == DLL_PROCESS_DETACH && overlayThread != nullptr)
+	{
+		// lpReserved is not null when the process is terminating, the thread is already gone.
+		if (lpReserved == nullptr && GetCurrentThreadId() != overlayThreadId)
+		{
+			// The DLL is unloaded by someone else: stop the overlay and give it time to clean up.
+			Overlay::RequestStop();
+			WaitForSingleObject(overlayThread, 1000);
+		}
 
-    if (fdwReason == DLL_PROCESS_DETACH)
-        TerminateThread(hCurrentUIThread, 0);
+		CloseHandle(overlayThread);
+		overlayThread = nullptr;
+	}
 
-    return TRUE;
+	return TRUE;
 }
 
 #else
 
-int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
+int WINAPI wWinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int)
 {
-    UI::Render();
+	Overlay::Run();
 
-    return 0;
+	return 0;
 }
 
 #endif

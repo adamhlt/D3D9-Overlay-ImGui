@@ -1,100 +1,112 @@
+#include "pch.h"
 #include "Drawing.h"
+#include "Target.h"
 
-LPCSTR Drawing::lpWindowName = "D3D9 Overlay ImGui";
-ImVec2 Drawing::vWindowSize = { 350, 75 };
-ImGuiWindowFlags Drawing::WindowFlags = 0;
-bool Drawing::bDraw = true;
-UI::WindowItem Drawing::lpSelectedWindow = {nullptr, "", ""};
-LPDIRECT3DDEVICE9 Drawing::pD3DDevice = nullptr;
-
-/**
-    @brief : function that check if the menu is drawed.
-    @retval : true if the function is drawed else false.
-**/
-bool Drawing::isActive()
+namespace
 {
-	return bDraw == true;
-}
+	constexpr const char* MenuName = "D3D9 Overlay ImGui";
+	constexpr ULONGLONG WindowListRefreshMs = 500;
 
-/**
-    @brief : Function that draw the ImGui menu.
-**/
-void Drawing::Draw()
-{
-	if (GetAsyncKeyState(VK_INSERT) & 1)
-		bDraw = !bDraw;
+	bool visible = true;
+	Target::WindowItem selectedWindow;
+	std::vector<Target::WindowItem> windowList;
+	ULONGLONG lastWindowListRefresh = 0;
 
-	if (isActive())
+	/**
+	    @brief : Draw the window picker.
+	             Only shown when the overlay is built as an EXE and no target has been chosen.
+	**/
+	void DrawWindowPicker()
 	{
-		// Draw the window picker.
-		// Should be drawed only when the overlay is build as an EXE.
-		if (!UI::IsWindowTargeted())
+		// Refreshing the list is expensive, do it a few times per second only.
+		const ULONGLONG now = GetTickCount64();
+		if (windowList.empty() || now - lastWindowListRefresh > WindowListRefreshMs)
 		{
-			std::vector<UI::WindowItem> WindowList;
-			UI::GetAllWindow(&WindowList);
-
-			if (WindowList.empty())
-				return;
-
-			ImGui::SetNextWindowSize({400, 100}, ImGuiCond_Once);
-			ImGui::SetNextWindowBgAlpha(1.0f);
-
-			ImGui::Begin("Overlay Target Chooser", &bDraw, WindowFlags);
-			{
-				if(ImGui::BeginCombo("##combo", lpSelectedWindow.CurrentWindowTitle))
-				{
-					for (const auto& item : WindowList)
-					{
-						const bool is_selected = (strcmp(lpSelectedWindow.CurrentWindowTitle, item.CurrentWindowTitle) == 0);
-						if (ImGui::Selectable(item.CurrentWindowTitle, is_selected))
-							lpSelectedWindow = item;
-						if (is_selected)
-							ImGui::SetItemDefaultFocus();
-					}
-					ImGui::EndCombo();
-				}
-				ImGui::NewLine();
-				if(ImGui::Button("Start Overlay"))
-				{
-					UI::SetTargetWindow(lpSelectedWindow.CurrentWindow);
-				}
-			}
-			ImGui::End();
-
-			return;
+			windowList = Target::GetAllWindows();
+			lastWindowListRefresh = now;
 		}
 
-		// Basic ImGui menu.
-		ImGui::SetNextWindowSize(vWindowSize, ImGuiCond_Once);
+		if (windowList.empty())
+			return;
+
+		ImGui::SetNextWindowSize({ 400, 100 }, ImGuiCond_Once);
 		ImGui::SetNextWindowBgAlpha(1.0f);
-		ImGui::Begin(lpWindowName, &bDraw, WindowFlags);
+
+		ImGui::Begin("Overlay Target Chooser", &visible);
 		{
+			if (ImGui::BeginCombo("##combo", selectedWindow.title.c_str()))
+			{
+				for (const auto& item : windowList)
+				{
+					const bool isSelected = selectedWindow.window == item.window;
+					if (ImGui::Selectable(item.title.c_str(), isSelected))
+						selectedWindow = item;
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
 
-			ImGui::Text("Create your own menu.");
+			ImGui::NewLine();
 
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			if (ImGui::Button("Start Overlay"))
+				Target::Set(selectedWindow.window);
 		}
 		ImGui::End();
 	}
 }
 
-/**
-    @brief : Function that set the D3D9 device and execute user D3D9 rendering.
-    @param pCurrentD3DDevice : current D3D9 device.
-**/
-void Drawing::DXDraw(const LPDIRECT3DDEVICE9 pCurrentD3DDevice)
+bool Drawing::IsVisible()
 {
-	pD3DDevice = pCurrentD3DDevice;
-	DrawFilledRectangle(100, 100, 500, 500, 255, 255, 255);
+	return visible;
 }
 
 /**
-    @brief : Function that draw a filed rectangle.
+    @brief : Draw the ImGui menu.
 **/
-void Drawing::DrawFilledRectangle(const int x, const int y, const int w, const int h, const unsigned char r, const unsigned char g, const unsigned char b)
+void Drawing::Draw()
 {
-	const D3DCOLOR rectColor = D3DCOLOR_XRGB(r, g, b);	//No point in using alpha because clear & alpha dont work!
-	const D3DRECT BarRect = { x, y, x + w, y + h };
+	if (GetAsyncKeyState(VK_INSERT) & 1)
+		visible = !visible;
 
-	pD3DDevice->Clear(1, &BarRect, D3DCLEAR_TARGET | D3DCLEAR_TARGET, rectColor, 0, 0);
+	if (!visible)
+		return;
+
+	if (!Target::IsSet())
+	{
+		DrawWindowPicker();
+		return;
+	}
+
+	// Basic ImGui menu.
+	ImGui::SetNextWindowSize({ 350, 75 }, ImGuiCond_Once);
+	ImGui::SetNextWindowBgAlpha(1.0f);
+
+	ImGui::Begin(MenuName, &visible);
+	{
+		ImGui::Text("Create your own menu.");
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	}
+	ImGui::End();
+}
+
+/**
+    @brief : Execute your own D3D9 rendering.
+    @param device : current D3D9 device.
+**/
+void Drawing::DXDraw(const LPDIRECT3DDEVICE9 device)
+{
+	// Example: DrawFilledRectangle(device, 100, 100, 500, 500, 255, 255, 255);
+	(void)device;
+}
+
+/**
+    @brief : Draw a filled rectangle.
+**/
+void Drawing::DrawFilledRectangle(const LPDIRECT3DDEVICE9 device, const int x, const int y, const int w, const int h, const unsigned char r, const unsigned char g, const unsigned char b)
+{
+	const D3DCOLOR color = D3DCOLOR_XRGB(r, g, b); // No point in using alpha because clear & alpha don't work!
+	const D3DRECT rect = { x, y, x + w, y + h };
+
+	device->Clear(1, &rect, D3DCLEAR_TARGET, color, 0, 0);
 }
